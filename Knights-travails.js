@@ -4,6 +4,8 @@ class position {
 
         this.moves = [];
 
+        this.last = null;
+
         this.buildMoveTree = (coordinates = this.start) => {
             for (let i = -2; i <=2;i++) {
                 if (i == 0) {
@@ -36,27 +38,46 @@ class position {
 function knightMoves(init, end) {
 
     let square = new position(init);
-    if (square.start[0] == end[0] && square.start[1] == end[1]) {
-        finished = true
-    };
+    let answer = [];
+
     square.buildMoveTree();
     square.moves.forEach(move1 => {
         move1.buildMoveTree();
-        console.log(move1)
+        move1.last = square;
         move1.moves.forEach(move2 => {
             move2.buildMoveTree();
+            move2.last = move1;
             move2.moves.forEach(move3=> {
                 move3.buildMoveTree();
+                move3.last = move2;
                 move3.moves.forEach(move4=> {
                     move4.buildMoveTree();
+                    move4.last = move3;
                     move4.moves.forEach(move5 => {
                         move5.buildMoveTree();
-                    })
-                })
-            })
-        })
+                        move5.last = move4;
+                        move5.moves.forEach(move6 => {
+                            move6.buildMoveTree();
+                            move6.last = move5;
+                        })
+                    });
+                });
+            });
+        });
     });
-    console.log(JSON.stringify(square, null, 5))
-}
 
-knightMoves([5,5],[5,5]);
+    let q = [];
+    q.push(square);
+    while (q[0]) {
+        let current = q.shift();
+        if (current.start[0] == end[0] && current.start[1] == end[1]) {
+            answer.unshift(current.start);
+            while (current.last) {
+                current = current.last;
+                answer.unshift(current.start)
+            };
+            return(answer)
+        }
+        current.moves.forEach(move => q.push(move));
+    };
+};
